@@ -12,6 +12,7 @@ readonly WORK_ROOT="${OWEN_WORK_ROOT:-${TMPDIR:-/tmp}/owen-runtime}"
 readonly MODEL_DIR="$WORK_ROOT/model"
 readonly STRATA_DIR="$WORK_ROOT/Strata"
 readonly TIER_DIR="$MODEL_DIR/$TIER"
+readonly VENV_DIR="$WORK_ROOT/.venv"
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 info() { printf '\n==> %s\n' "$*"; }
@@ -24,16 +25,30 @@ command -v curl >/dev/null || die "curl is required."
 
 gpu_mib="$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits | sort -nr | head -n1 | tr -d ' ')"
 (( gpu_mib >= 12000 )) || die "Need at least 12 GB VRAM; detected ${gpu_mib} MiB."
+# /proc/meminfo may show host RAM instead of the container's usable limit.
 ram_kib="$(awk '/MemTotal:/ {print $2}' /proc/meminfo)"
+for limit_file in /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory/memory.limit_in_bytes; do
+  if [[ -r "$limit_file" ]]; then
+    limit_bytes="$(<"$limit_file")"
+    if [[ "$limit_bytes" =~ ^[0-9]+$ ]] && (( limit_bytes < 1152921504606846976 )); then
+      limit_kib=$((limit_bytes / 1024))
+      (( limit_kib < ram_kib )) && ram_kib="$limit_kib"
+    fi
+    break
+  fi
+done
 (( ram_kib >= 48 * 1024 * 1024 )) || die "Need at least 48 GiB system RAM for IQ2_XS; detected about $((ram_kib / 1024 / 1024)) GiB."
 mkdir -p "$WORK_ROOT"
 free_kib="$(df -Pk "$WORK_ROOT" | awk 'NR==2 {print $4}')"
 (( free_kib >= 90 * 1024 * 1024 )) || die "Need at least 90 GiB free disk at $WORK_ROOT; choose a larger ephemeral disk."
 
-info "Hardware accepted: $(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader | head -n1), $((ram_kib / 1024 / 1024)) GiB RAM."
-info "Installing the Hugging Face download client (public model; no token required)."
-python3 -m pip install --user --upgrade huggingface_hub
-export PATH="$HOME/.local/bin:$PATH"
+info "Hardware accepted: $(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader | head -n1), effective cgroup/host limit $((ram_kib / 1024 / 1024)) GiB RAM."
+info "Installing the Hugging Face download client in an isolated virtual environment."
+if [[ ! -x "$VENV_DIR/bin/python" ]] || ! "$VENV_DIR/bin/python" -m pip --version >/dev/null 2>&1; then
+  python3 -m venv "$VENV_DIR" || die "Could not create a Python virtual environment. Install python3-venv and retry."
+fi
+"$VENV_DIR/bin/python" -m pip install --upgrade pip huggingface_hub
+export PATH="$VENV_DIR/bin:$PATH"
 command -v hf >/dev/null || die "The hf command was not installed. Reconnect to the pod shell and retry."
 
 info "Downloading pinned IQ2_XS model, vision projector, refusal-direction vector, and checksums. This is about 70 GB."
