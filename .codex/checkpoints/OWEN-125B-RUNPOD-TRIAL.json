@@ -1,7 +1,7 @@
 {
   "task_id": "OWEN-125B-RUNPOD-TRIAL",
   "project": "Owen-125B",
-  "summary": "Inspect current RunPod checkout and, if RTX 3090 with at least 64 GiB RAM and adequate disk is available within the $1/hour cap including any storage charges, run the model deployment trial and verify text, vision, API, and Cline connectivity.",
+  "summary": "Run the selected RunPod RTX 3090 deployment at $0.52/hour if the account permits, then verify the model deployment, text, vision, API, and Cline connectivity.",
   "status": "PENDING",
   "depends_on": [],
   "blocked_by": [],
@@ -9,7 +9,7 @@
   "actual_model": null,
   "reasoning_effort": "medium",
   "checkpoint": "Repository main pushed; latest commit fc5800f; scripts/deploy.sh syntax/preflight checked; live GPU install not run.",
-  "next_step": "Read live RunPod pricing and offer details before provisioning; stop if cost or storage billing exceeds the approved limit.",
+  "next_step": "Resolve the account payment state if deployment is blocked; then run the reviewed bootstrap script and verify API connectivity.",
   "resume_after": null,
   "created_at": "2026-10-25T13:58:49Z",
   "updated_at": "2026-10-25T13:58:49Z"

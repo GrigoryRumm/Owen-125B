@@ -14,8 +14,8 @@ Keep a reproducible, separate deployment for the 125B Qwen3.8-Flash-Next model w
 
 - Runtime: Strata source setup, pinned to release `v0.2.5` pending live compatibility test.
 - Checkpoint: `alesha-pro/Qwen3.8-Flash-Next-abliterated-GSQ-RCO-Strata-GGUF`, `IQ2_XS` (smallest tested uncensored option with image projector).
-- Trial host recommendation: RunPod RTX 3090, 24 GB VRAM, 125 GB RAM, catalog price $0.50/h before storage; select only if checkout confirms all requirements and total remains under $1/h.
-- Model weights will be downloaded to ephemeral local disk each new pod; no persistent volume configured.
+- Trial host recommendation: live RunPod checkout currently shows RTX 3090, 24 GB VRAM, 62 GB RAM, 32 vCPU; with 120 GB container disk, total is $0.52/h ($0.50 GPU + $0.017 disk).
+- Model weights will be downloaded to a 120 GB ephemeral container disk each new pod; no persistent volume configured.
 - API is loopback-only on the pod and reached through an SSH tunnel; no public API port.
 
 ## Active work
