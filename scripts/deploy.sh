@@ -40,7 +40,15 @@ done
 (( ram_kib >= 48 * 1024 * 1024 )) || die "Need at least 48 GiB system RAM for IQ2_XS; detected about $((ram_kib / 1024 / 1024)) GiB."
 mkdir -p "$WORK_ROOT"
 free_kib="$(df -Pk "$WORK_ROOT" | awk 'NR==2 {print $4}')"
-(( free_kib >= 90 * 1024 * 1024 )) || die "Need at least 90 GiB free disk at $WORK_ROOT; choose a larger ephemeral disk."
+required_free_kib=$((90 * 1024 * 1024))
+if [[ -s "$TIER_DIR/Qwen3.8-Flash-Next-GSQ-RCO-IQ2_XS-00001-of-00002.gguf" \
+   && -s "$TIER_DIR/Qwen3.8-Flash-Next-GSQ-RCO-IQ2_XS-00002-of-00002.gguf" \
+   && ( -s "$MODEL_DIR/mmproj-Qwen3.8-Flash-Next-BF16.gguf" || -s "$TIER_DIR/mmproj-Qwen3.8-Flash-Next-BF16.gguf" ) \
+   && -s "$MODEL_DIR/Huihui-Qwen3.8-Flash-Next-refusal-direction-r.gguf" ]]; then
+  required_free_kib=$((30 * 1024 * 1024))
+  info "Model artifacts are already present; using the 30 GiB setup headroom check."
+fi
+(( free_kib >= required_free_kib )) || die "Need at least $((required_free_kib / 1024 / 1024)) GiB free disk at $WORK_ROOT; choose a larger ephemeral disk."
 
 info "Hardware accepted: $(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader | head -n1), effective cgroup/host limit $((ram_kib / 1024 / 1024)) GiB RAM."
 info "Installing the Hugging Face download client in an isolated virtual environment."
