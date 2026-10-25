@@ -20,7 +20,7 @@ Keep a reproducible, separate deployment for the 125B Qwen3.8-Flash-Next model w
 
 ## Active work
 
-- Deployment scripts and operator documentation.
+- Initial deployment prototype is committed and pushed to GitHub (`main`, commit `752cb13`).
 
 ## Not yet verified
 
@@ -30,4 +30,4 @@ Keep a reproducible, separate deployment for the 125B Qwen3.8-Flash-Next model w
 
 ## Next checkpoint
 
-Review scripts; publish to the existing GitHub repository; then run the bounded GPU trial on a confirmed eligible pod.
+Inspect the live RunPod checkout; only create a pod if the exact host specs fit and storage + compute charges remain within the owner's limit. Then run the bounded trial and validate text, vision, and client connection.
