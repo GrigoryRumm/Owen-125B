@@ -70,10 +70,12 @@ if [[ ! -d "$STRATA_DIR/.git" ]]; then
   git clone --depth 1 --branch "$STRATA_TAG" https://github.com/Niko1221/Strata.git "$STRATA_DIR"
 fi
 
-info "Preparing Strata and starting the local-only API. Review setup's summary before accepting downloads."
+info "Preparing Strata with the explicit Qwen IQ2_XS configuration and starting the loopback-only API."
 cd "$STRATA_DIR"
 ./setup.sh --setup \
+  --family qwen \
   --model "$TIER" \
+  --yes \
   --gguf-dir "$TIER_DIR" \
   --vision gpu \
   --experimental-speed-projection "$MODEL_DIR/Huihui-Qwen3.8-Flash-Next-refusal-direction-r.gguf"
